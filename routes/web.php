@@ -13,8 +13,6 @@ use App\Http\Controllers\TestController;
 |
 */
 
-Route::get('/test', function () {
+Route::get('', function () {
     return view('welcome');
 });
-
-Route::get('/testController', [TestController::class,'controllerMethod']);
