@@ -13,6 +13,6 @@ use App\Http\Controllers\TestController;
 |
 */
 
-Route::get('', function () {
+Route::any('{slug}', function () {
     return view('welcome');
 });

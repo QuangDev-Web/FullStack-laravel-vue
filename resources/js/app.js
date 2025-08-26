@@ -5,6 +5,8 @@ import App from '../App.vue';
 const routes = [
   { path: '/', component: () => import('../components/Home.vue') },
   { path: '/about', component: () => import('../components/About.vue') },
+  { path: '/hooks', component: () => import('../components/base/Hooks.vue') },
+
 ];
 
 const router = createRouter({
