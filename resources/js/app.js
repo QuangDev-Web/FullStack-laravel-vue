@@ -1,6 +1,17 @@
-import './bootstrap';
 import { createApp } from 'vue';
-import App from '../components/App.vue';
+import { createRouter, createWebHistory } from 'vue-router';
+import App from '../App.vue';
 
-// Mount Vue vào thẻ có id="app"
-createApp(App).mount('#app');
+const routes = [
+  { path: '/', component: () => import('../components/Home.vue') },
+  { path: '/about', component: () => import('../components/About.vue') },
+];
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+});
+
+const app = createApp(App);
+app.use(router);
+app.mount('#app');

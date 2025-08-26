@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Hello từ Vue 3 trong Laravel 10 + Vite 5 🚀</h1>
+    <h1>Hello từ Vue 3 Home trong Laravel 10 + Vite 5 🚀</h1>
   </div>
 </template>
 
