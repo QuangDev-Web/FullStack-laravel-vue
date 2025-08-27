@@ -3,8 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import App from '../App.vue';
 
 const routes = [
-  { path: '/', component: () => import('../components/Home.vue') },
-  { path: '/about', component: () => import('../components/About.vue') },
+  { path: '/', component: () => import('../pages/Dashboard.vue') },
+  { path: '/tags', component: () => import('../pages/Tags.vue') },
   { path: '/hooks', component: () => import('../components/base/Hooks.vue') },
 
 ];

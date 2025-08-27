@@ -1,11 +1,28 @@
 <template>
   <div>
-    <nav style="margin-bottom: 20px;">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link> |
-      <router-link to="/hooks">Hooks</router-link>
-    </nav>
-
+    <div class="navbar bg-base-100 shadow-sm">
+      <router-link to="/" class="btn btn-ghost text-xl">DevAdmin</router-link>
+    </div>
+    
+    <div role="tablist" class="tabs tabs-box">
+      <router-link 
+        to="/" 
+        role="tab" 
+        class="tab"
+        :class="{'tab-active' : $route.path === '/'}"
+      >
+        Dashboard
+      </router-link>
+      <router-link 
+        to="/tags" 
+        role="tab" 
+        class="tab"
+        :class="{'tab-active' : $route.path.startsWith('/tags')}"
+      >
+        Tags
+      </router-link>
+    </div>
+    <br>
     <!-- Đây là chỗ vue-router render component -->
     <router-view />
   </div>
@@ -14,14 +31,3 @@
 <script setup>
 // ở Vue 3 với <script setup> thì không cần import gì thêm cho router-view/router-link
 </script>
-
-<style scoped>
-nav a {
-  margin: 0 8px;
-  text-decoration: none;
-  color: #42b983;
-}
-nav a.router-link-active {
-  font-weight: bold;
-}
-</style>
