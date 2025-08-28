@@ -77,7 +77,9 @@
 
 <script>
 import { useApi } from '../js/composables/useApi';
+import { useToast } from 'vue-toastification';
 const { callApi } = useApi();
+const toast = useToast();
 export default {
     data() {
         return {
@@ -90,14 +92,18 @@ export default {
     },
     methods: {
         async addTag() {
-            if(this.data.tagName.trim() === '') return
+            if(this.data.tagName.trim() === '') return toast.error('Fill the TagName before Add Tag');
+            this.isAdding = true
             const res = await callApi('post','/app/create_tag',this.data)
             if(res.status === 201) {
                 this.tags.unshift(res.data);
                 this.data.tagName = '';
+                this.isAdding = false
                 tag_add_modal.close()
+                toast.success('Add TagName successfully!')
             } else {
-                console.log('error')
+                toast.error('Add TagName Failed!')
+                this.isAdding = false
             }
         }
     },
@@ -106,7 +112,7 @@ export default {
         if(res.status === 200) {
             this.tags = res.data;
         } else {
-            console.log('fetch tags error')
+            toast.error('fetch tags error')
         }
     }
     
