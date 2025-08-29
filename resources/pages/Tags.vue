@@ -30,13 +30,19 @@
                 </thead>
                 <tbody>
                     <!-- row 1 -->
-                    <tr v-if="tags.length" v-for="tag in tags" :key="tag.id">
+                    <tr v-if="tags.length" v-for="(tag,i) in tags" :key="tag.id">
                         <th>{{ tag.id }}</th>
                         <td>{{ tag.tagName }}</td>
                         <td>{{ tag.created_at }}</td>
                         <td>
                             <button class="btn btn-success mr-2" @click="openModal(tag)">Edit</button>
-                            <button class="btn btn-error" @click="deleteTag(tag)">Delete</button>
+                            <button 
+                                class="btn btn-error" 
+                                @click="deleteTag(tag,i)" 
+                                :disabled="tag.isDeleting"
+                            >
+                                Delete
+                            </button>
                         </td>
                     </tr>
                 </tbody>
@@ -44,7 +50,7 @@
         </div>
     </div>
 
-    <!-- Tag adding modal -->
+    <!-- Tag modal -->
     <dialog ref="tagModal" id="tag_add_modal" class="modal">
         <div class="modal-box">
             <h3 class="text-lg font-bold">{{ isModalEdit ? 'Editing Tag' : 'Adding Tag' }}</h3>
@@ -65,7 +71,6 @@
                         <button
                             class="btn mr-2 btn-info"
                             :disabled="isAddingOREditing"
-                            :loading="isAddingOREditing"
                             type="submit"
                         >
                             {{ isAddingOREditing ? 'loading..' : isModalEdit ? 'Edit tag' : 'Add Tag'}}
@@ -168,10 +173,18 @@ export default {
                 await this.addTag()
             }
         },
-        // async deleteTag(tag) {
-        //     if(!confirm(`Are you sure you want to delete ${tag.tagName} tag?`)) return
-        //     this.$set(tag,'isDeleting',true);
-        // }
+        async deleteTag(tag,i) {
+            if(!confirm(`Are you sure you want to delete ${tag.tagName} tag?`)) return
+            tag.isDeleting = true;
+            const res = await callApi('post','/app/delete_tag',tag)
+            if(res.status === 200) {
+                this.tags.splice(i,1);
+                toast.success('Delete Tag successfully!')
+            } else {
+                toast.error('Delete TagName Failed!')
+                tag.isDeleting = false;
+            }
+        }
         
     },
     created() {
