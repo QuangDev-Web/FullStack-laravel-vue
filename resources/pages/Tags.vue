@@ -1,53 +1,56 @@
 <template>
-    <div class="mx-32 mb-5">
-        <button class="btn" onclick="tag_add_modal.showModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke-width="2.5" 
-                stroke="currentColor" 
-                class="size-[1.2em]">
-            <path stroke-linecap="round" 
-                    stroke-linejoin="round" 
-                    d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Add tag
-        </button>
-    </div>
-
-    <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100 mx-32">
-        <table class="table">
-            <!-- head -->
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tag name</th>
-                    <th>Created at</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- row 1 -->
-                <tr v-if="tags.length" v-for="tag in tags" :key="tag.id">
-                    <th>{{ tag.id }}</th>
-                    <td>{{ tag.tagName }}</td>
-                    <td>{{ tag.created_at }}</td>
-                    <td>
-                        <button class="btn btn-success mr-2">Edit</button>
-                        <button class="btn btn-error">Delete</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div v-if="isLoading" class="text center">Loading tags ...</div>
+    <div v-else>
+        <div class="mx-32 mb-5">
+            <button class="btn" @click="openModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke-width="2.5" 
+                    stroke="currentColor" 
+                    class="size-[1.2em]">
+                <path stroke-linecap="round" 
+                        stroke-linejoin="round" 
+                        d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Add tag
+            </button>
+        </div>
+    
+        <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100 mx-32">
+            <table class="table">
+                <!-- head -->
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tag name</th>
+                        <th>Created at</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- row 1 -->
+                    <tr v-if="tags.length" v-for="tag in tags" :key="tag.id">
+                        <th>{{ tag.id }}</th>
+                        <td>{{ tag.tagName }}</td>
+                        <td>{{ tag.created_at }}</td>
+                        <td>
+                            <button class="btn btn-success mr-2" @click="openModal(tag)">Edit</button>
+                            <button class="btn btn-error" @click="deleteTag(tag)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Tag adding modal -->
-    <dialog id="tag_add_modal" class="modal">
+    <dialog ref="tagModal" id="tag_add_modal" class="modal">
         <div class="modal-box">
-            <h3 class="text-lg font-bold">Adding Tag</h3>
-            <p class="py-4">Fill the form to add the tag new:</p>
+            <h3 class="text-lg font-bold">{{ isModalEdit ? 'Editing Tag' : 'Adding Tag' }}</h3>
+            <p class="py-4">{{ isModalEdit ? 'Editing the form to change the tag' : 'Fill the form to add the tag new:' }}</p>
             <div class="modal-action justify-start w-full mt-0">
-                <form @submit.prevent="addTag" class="w-full">
+                <form @submit.prevent="handleSubmit" class="w-full">
                     <label class="floating-label">
                         <span>Tag Name</span>
                         <input 
@@ -61,11 +64,11 @@
                     <div class="justify-self-end">
                         <button
                             class="btn mr-2 btn-info"
-                            :disabled="isAdding"
-                            :loading="isAdding"
+                            :disabled="isAddingOREditing"
+                            :loading="isAddingOREditing"
                             type="submit"
                         >
-                            {{ isAdding ? 'Adding..' : 'Add Tag'}}
+                            {{ isAddingOREditing ? 'loading..' : isModalEdit ? 'Edit tag' : 'Add Tag'}}
                         </button>
                         <button class="btn" type="button" onclick="tag_add_modal.close()">Close</button>
                     </div>
@@ -84,36 +87,95 @@ export default {
     data() {
         return {
             data: {
+                id: null,
                 tagName: ''
             },
             tags: [],
-            isAdding: false,
+            isLoading: true,
+            isModalOpen: false,
+            isModalEdit: false,
+            isAddingOREditing: false,
         }
     },
     methods: {
+        async fetchAllTags() {
+            try {
+                const res = await callApi('get','/app/get_all_tag');
+                if(res.status === 200) {
+                    this.tags = res.data;
+                }
+            } catch (error) {
+                toast.error('fetch tags error');
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        openModal(tag) {
+            if(tag) {
+                this.isModalEdit = true;
+                this.data = {...tag}
+            } else {
+                this.isModalEdit = false;
+                this.data = {id: null, tagName: ''}
+            }
+            this.$refs.tagModal.showModal()
+        },
         async addTag() {
             if(this.data.tagName.trim() === '') return toast.error('Fill the TagName before Add Tag');
-            this.isAdding = true
+            this.isAddingOREditing = true
             const res = await callApi('post','/app/create_tag',this.data)
             if(res.status === 201) {
+                console.log('res.data: ',res.data)
                 this.tags.unshift(res.data);
                 this.data.tagName = '';
-                this.isAdding = false
+                this.isAddingOREditing = false
                 tag_add_modal.close()
                 toast.success('Add TagName successfully!')
             } else {
-                toast.error('Add TagName Failed!')
-                this.isAdding = false
+                if(res.status === 422) {
+                    toast.error(res.data.message);
+                } else {
+                    toast.error('Add TagName Failed!')
+                }
+                this.isAddingOREditing = false
             }
-        }
+        },
+        async editTag() {
+            if(this.data.tagName.trim() === '') return toast.error('Fill the TagName before Add Tag');
+            this.isAddingOREditing = true
+            const res = await callApi('post','/app/edit_tag',this.data)
+            if(res.status === 200) {
+                const index = this.tags.findIndex(tag => tag.id === this.data.id);
+                if(index !== -1) {
+                    this.tags[index] = JSON.parse(res.config.data);
+                }
+                this.isAddingOREditing = false
+                tag_add_modal.close()
+                toast.success('Edit TagName successfully!')
+            } else {
+                if(res.status === 422) {
+                    toast.error(res.data.message);
+                } else {
+                    toast.error('Edit TagName Failed!')
+                }
+                this.isAddingOREditing = false
+            }
+        },
+        async handleSubmit() {
+            if(this.isModalEdit) {
+                await this.editTag()
+            } else {
+                await this.addTag()
+            }
+        },
+        // async deleteTag(tag) {
+        //     if(!confirm(`Are you sure you want to delete ${tag.tagName} tag?`)) return
+        //     this.$set(tag,'isDeleting',true);
+        // }
+        
     },
-    async created() {
-        const res = await callApi('get','/app/get_all_tag');
-        if(res.status === 200) {
-            this.tags = res.data;
-        } else {
-            toast.error('fetch tags error')
-        }
+    created() {
+        this.fetchAllTags()
     }
     
 }

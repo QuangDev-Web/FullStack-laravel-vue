@@ -9,7 +9,6 @@ export function useApi() {
         data: dataObj,
       })
     } catch (error) {
-      console.log('error')
       return error.response
     }
   }
