@@ -19,7 +19,3 @@ Route::any('{slug}', function () {
 Route::get('', function () {
     return view('welcome');
 });
-Route::post('/app/create_tag',[AdminController::class,'addTag']);
-Route::get('/app/get_all_tag',[AdminController::class,'getAllTags']);
-Route::post('/app/edit_tag',[AdminController::class,'editTag']);
-Route::post('/app/delete_tag',[AdminController::class,'deleteTag']);

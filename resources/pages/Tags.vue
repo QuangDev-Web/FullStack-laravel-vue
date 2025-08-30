@@ -105,7 +105,7 @@ export default {
     methods: {
         async fetchAllTags() {
             try {
-                const res = await callApi('get','/app/get_all_tag');
+                const res = await callApi('get','/api/tags');
                 if(res.status === 200) {
                     this.tags = res.data;
                 }
@@ -128,7 +128,7 @@ export default {
         async addTag() {
             if(this.data.tagName.trim() === '') return toast.error('Fill the TagName before Add Tag');
             this.isAddingOREditing = true
-            const res = await callApi('post','/app/create_tag',this.data)
+            const res = await callApi('post','/api/tags',this.data)
             if(res.status === 201) {
                 console.log('res.data: ',res.data)
                 this.tags.unshift(res.data);
@@ -148,7 +148,7 @@ export default {
         async editTag() {
             if(this.data.tagName.trim() === '') return toast.error('Fill the TagName before Add Tag');
             this.isAddingOREditing = true
-            const res = await callApi('post','/app/edit_tag',this.data)
+            const res = await callApi('put',`/api/tags/${this.data.id}`,this.data)
             if(res.status === 200) {
                 const index = this.tags.findIndex(tag => tag.id === this.data.id);
                 if(index !== -1) {
@@ -176,7 +176,7 @@ export default {
         async deleteTag(tag,i) {
             if(!confirm(`Are you sure you want to delete ${tag.tagName} tag?`)) return
             tag.isDeleting = true;
-            const res = await callApi('post','/app/delete_tag',tag)
+            const res = await callApi('delete',`/api/tags/${tag.id}`,tag)
             if(res.status === 200) {
                 this.tags.splice(i,1);
                 toast.success('Delete Tag successfully!')
