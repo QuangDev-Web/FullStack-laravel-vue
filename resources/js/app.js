@@ -6,6 +6,7 @@ import 'vue-toastification/dist/index.css'
 const routes = [
   { path: '/', component: () => import('../pages/Dashboard.vue') },
   { path: '/tags', component: () => import('../pages/Tags.vue') },
+  { path: '/categories', component: () => import('../pages/Categories.vue') },
   { path: '/hooks', component: () => import('../components/base/Hooks.vue') },
 
 ];

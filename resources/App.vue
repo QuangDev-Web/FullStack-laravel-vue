@@ -21,6 +21,14 @@
       >
         Tags
       </router-link>
+      <router-link 
+        to="/categories" 
+        role="tab" 
+        class="tab"
+        :class="{'tab-active' : $route.path.startsWith('/categories')}"
+      >
+        Categories
+      </router-link>
     </div>
     <br>
     <!-- Đây là chỗ vue-router render component -->
